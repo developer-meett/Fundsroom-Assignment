@@ -91,5 +91,24 @@ router.get('/:id', async (req: AuthRequest, res: Response): Promise<void> => {
   }
 });
 
+// POST /api/challans — create DRAFT challan
+router.post('/', authorizeRoles('ADMIN', 'SALES'), async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { customer_id, items } = req.body;
+    
+    if (!customer_id || !items || !Array.isArray(items) || items.length === 0) {
+      res.status(400).json({ message: 'customer_id and a non-empty items array are required' });
+      return;
+    }
+
+    const customer = await prisma.customer.findUnique({ where: { id: parseInt(customer_id) } });
+    if (!customer) {
+      res.status(404).json({ message: 'Customer not found' });
+      return;
+    }
+
+    let totalQuantity = 0;
+    const challanItemsData = [];
+
 
 export default router;
