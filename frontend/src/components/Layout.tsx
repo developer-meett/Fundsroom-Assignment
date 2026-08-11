@@ -24,11 +24,13 @@ export const Layout = () => {
           
           <Link to="/products" className={`nav-link ${location.pathname.startsWith('/products') ? 'active' : ''}`}>Products</Link>
           
-          {['ADMIN', 'WAREHOUSE'].includes(user?.role || '') && (
+          {['ADMIN', 'WAREHOUSE', 'ACCOUNTS'].includes(user?.role || '') && (
             <Link to="/inventory" className={`nav-link ${location.pathname.startsWith('/inventory') ? 'active' : ''}`}>Inventory / Stock</Link>
           )}
           
-          <Link to="/challans" className={`nav-link ${location.pathname.startsWith('/challans') ? 'active' : ''}`}>Sales Challans</Link>
+          {['ADMIN', 'SALES', 'WAREHOUSE', 'ACCOUNTS'].includes(user?.role || '') && (
+            <Link to="/challans" className={`nav-link ${location.pathname.startsWith('/challans') ? 'active' : ''}`}>Sales Challans</Link>
+          )}
         </nav>
         <div className="sidebar-footer">
           <div style={{ marginBottom: '0.5rem', fontWeight: 500 }}>{user?.name}</div>
