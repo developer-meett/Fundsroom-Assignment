@@ -170,4 +170,78 @@ router.put('/:id', authorizeRoles('ADMIN', 'WAREHOUSE'), async (req: AuthRequest
     res.status(500).json({ message: 'Internal server error' });
   }
 });
+// POST /api/products/:id/stock — adjust stock (IN or OUT)
+router.post('/:id/stock', authorizeRoles('ADMIN', 'WAREHOUSE'), async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      res.status(400).json({ message: 'Invalid product ID' });
+      return;
+    }
+
+    const { quantity, type, reason } = req.body;
+
+    if (!quantity || !type) {
+      res.status(400).json({ message: 'Quantity and type are required' });
+      return;
+    }
+
+    const qty = parseInt(quantity);
+    if (isNaN(qty) || qty <= 0) {
+      res.status(400).json({ message: 'Quantity must be a positive integer' });
+      return;
+    }
+
+    if (type !== 'IN' && type !== 'OUT') {
+      res.status(400).json({ message: 'Type must be IN or OUT' });
+      return;
+    }
+
+    // Use a transaction to ensure stock consistency
+    const result = await prisma.$transaction(async (tx) => {
+      const product = await tx.product.findUnique({ where: { id } });
+      if (!product) {
+        throw new Error('PRODUCT_NOT_FOUND');
+      }
+
+      if (type === 'OUT') {
+        if (product.current_stock < qty) {
+          throw new Error('INSUFFICIENT_STOCK');
+        }
+      }
+
+      const newStock = type === 'IN' ? product.current_stock + qty : product.current_stock - qty;
+
+      const updatedProduct = await tx.product.update({
+        where: { id },
+        data: { current_stock: newStock },
+      });
+
+      const movement = await tx.stockMovement.create({
+        data: {
+          product_id: id,
+          quantity: qty,
+          type,
+          reason: reason || null,
+          created_by: req.user!.id,
+        },
+      });
+
+      return { product: updatedProduct, movement };
+    });
+
+    res.json(result);
+  } catch (error: any) {
+    if (error.message === 'PRODUCT_NOT_FOUND') {
+      res.status(404).json({ message: 'Product not found' });
+      return;
+    }
+    if (error.message === 'INSUFFICIENT_STOCK') {
+      res.status(400).json({ message: 'Insufficient stock. Cannot reduce stock below zero.' });
+      return;
+    }
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
 export default router;
