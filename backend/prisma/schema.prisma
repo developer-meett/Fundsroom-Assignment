@@ -1,13 +1,94 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            Int      @id @default(autoincrement())
+  name          String
+  email         String   @unique
+  password_hash String
+  role          String   // ADMIN, SALES, WAREHOUSE, ACCOUNTS
+  created_at    DateTime @default(now())
+
+  stock_movements StockMovement[]
+  challans        Challan[]
+}
+
+model Customer {
+  id             Int      @id @default(autoincrement())
+  name           String
+  mobile         String
+  email          String?
+  business_name  String?
+  gst_number     String?
+  customer_type  String?
+  address        String?
+  status         String   @default("ACTIVE")
+  follow_up_date DateTime?
+  notes          String?
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
+
+  challans       Challan[]
+}
+
+model Product {
+  id                 Int      @id @default(autoincrement())
+  name               String
+  sku                String   @unique
+  category           String?
+  unit_price         Float
+  current_stock      Int      @default(0)
+  minimum_stock      Int      @default(0)
+  warehouse_location String?
+  created_at         DateTime @default(now())
+  updated_at         DateTime @updatedAt
+
+  stock_movements    StockMovement[]
+  challan_items      ChallanItem[]
+}
+
+model StockMovement {
+  id         Int      @id @default(autoincrement())
+  product_id Int
+  quantity   Int
+  type       String   // IN, OUT
+  reason     String?
+  created_by Int
+  created_at DateTime @default(now())
+
+  product    Product  @relation(fields: [product_id], references: [id])
+  user       User     @relation(fields: [created_by], references: [id])
+}
+
+model Challan {
+  id             Int      @id @default(autoincrement())
+  challan_number String   @unique
+  customer_id    Int
+  status         String   // DRAFT, CONFIRMED
+  total_quantity Int      @default(0)
+  created_by     Int
+  created_at     DateTime @default(now())
+
+  customer       Customer      @relation(fields: [customer_id], references: [id])
+  user           User          @relation(fields: [created_by], references: [id])
+  items          ChallanItem[]
+}
+
+model ChallanItem {
+  id           Int      @id @default(autoincrement())
+  challan_id   Int
+  product_id   Int
+  product_name String
+  sku          String
+  unit_price   Float
+  quantity     Int
+
+  challan      Challan  @relation(fields: [challan_id], references: [id])
+  product      Product  @relation(fields: [product_id], references: [id])
 }
