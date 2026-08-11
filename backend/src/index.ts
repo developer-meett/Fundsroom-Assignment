@@ -13,12 +13,23 @@ const app = express();
 const PORT = process.env.PORT || 5001;
 
 app.use(cors({
-  origin: [
-    'http://localhost:5173', 
-    'http://localhost:5174', 
-    'http://localhost:5175',
-    'https://fundsroom-assignment-theta.vercel.app'
-  ],
+  origin: function (origin, callback) {
+    const allowed = [
+      'http://localhost:5173',
+      'http://localhost:5174',
+      'http://localhost:5175',
+    ];
+    // Allow requests with no origin (mobile apps, curl, etc.)
+    if (!origin) return callback(null, true);
+    // Allow all Vercel preview/production URLs for this project
+    if (origin.includes('fundsroom-assignment') && origin.includes('vercel.app')) {
+      return callback(null, true);
+    }
+    if (allowed.includes(origin)) {
+      return callback(null, true);
+    }
+    callback(new Error('Not allowed by CORS'));
+  },
   credentials: true
 }));
 app.use(express.json());
