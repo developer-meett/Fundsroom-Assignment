@@ -7,6 +7,9 @@ import { Dashboard } from './pages/Dashboard';
 import { CustomerList } from './pages/CustomerList';
 import { CustomerForm } from './pages/CustomerForm';
 import { CustomerDetail } from './pages/CustomerDetail';
+import { ProductList } from './pages/ProductList';
+import { ProductForm } from './pages/ProductForm';
+import { ProductDetail } from './pages/ProductDetail';
 import './index.css';
 
 function App() {
@@ -22,7 +25,11 @@ function App() {
               <Route path="/customers/new" element={<CustomerForm />} />
               <Route path="/customers/:id" element={<CustomerDetail />} />
               <Route path="/customers/:id/edit" element={<CustomerForm />} />
-              <Route path="/products" element={<div className="card">Products Module Pending...</div>} />
+              <Route path="/products" element={<ProductList />} />
+              <Route path="/products/new" element={<ProductForm />} />
+              <Route path="/products/:id" element={<ProductDetail />} />
+              <Route path="/products/:id/edit" element={<ProductForm />} />
+              <Route path="/inventory" element={<ProductList />} />
               <Route path="/challans" element={<div className="card">Challans Module Pending...</div>} />
             </Route>
           </Route>
@@ -33,3 +40,4 @@ function App() {
 }
 
 export default App;
+
