@@ -85,4 +85,89 @@ router.get('/:id', async (req: AuthRequest, res: Response): Promise<void> => {
     res.status(500).json({ message: 'Internal server error' });
   }
 });
+// POST /api/products — create product
+router.post('/', authorizeRoles('ADMIN', 'WAREHOUSE'), async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { name, sku, category, unit_price, current_stock, minimum_stock, warehouse_location } = req.body;
+
+    if (!name || !sku || unit_price === undefined) {
+      res.status(400).json({ message: 'Name, SKU, and unit_price are required' });
+      return;
+    }
+
+    // Check for duplicate SKU
+    const existing = await prisma.product.findUnique({ where: { sku } });
+    if (existing) {
+      res.status(409).json({ message: 'A product with this SKU already exists' });
+      return;
+    }
+
+    const product = await prisma.product.create({
+      data: {
+        name,
+        sku,
+        category: category || null,
+        unit_price: parseFloat(unit_price),
+        current_stock: parseInt(current_stock) || 0,
+        minimum_stock: parseInt(minimum_stock) || 0,
+        warehouse_location: warehouse_location || null,
+      },
+    });
+
+    res.status(201).json(product);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// PUT /api/products/:id — update product
+router.put('/:id', authorizeRoles('ADMIN', 'WAREHOUSE'), async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      res.status(400).json({ message: 'Invalid product ID' });
+      return;
+    }
+
+    const existing = await prisma.product.findUnique({ where: { id } });
+    if (!existing) {
+      res.status(404).json({ message: 'Product not found' });
+      return;
+    }
+
+    const { name, sku, category, unit_price, minimum_stock, warehouse_location } = req.body;
+
+    if (!name || !sku || unit_price === undefined) {
+      res.status(400).json({ message: 'Name, SKU, and unit_price are required' });
+      return;
+    }
+
+    // Check for duplicate SKU (excluding current product)
+    if (sku !== existing.sku) {
+      const duplicate = await prisma.product.findUnique({ where: { sku } });
+      if (duplicate) {
+        res.status(409).json({ message: 'A product with this SKU already exists' });
+        return;
+      }
+    }
+
+    const product = await prisma.product.update({
+      where: { id },
+      data: {
+        name,
+        sku,
+        category: category || null,
+        unit_price: parseFloat(unit_price),
+        minimum_stock: minimum_stock !== undefined ? parseInt(minimum_stock) : existing.minimum_stock,
+        warehouse_location: warehouse_location || null,
+      },
+    });
+
+    res.json(product);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
 export default router;
