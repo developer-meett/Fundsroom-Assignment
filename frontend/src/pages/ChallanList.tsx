@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
 
 export const ChallanList = () => {
@@ -8,6 +8,8 @@ export const ChallanList = () => {
   const [error, setError] = useState('');
   const [searchParams, setSearchParams] = useSearchParams();
   const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0 });
+  const { user } = useAuth();
+  const canCreate = ['ADMIN', 'SALES'].includes(user?.role || '');
 
   const currentPage = parseInt(searchParams.get('page') || '1');
 
@@ -32,7 +34,7 @@ export const ChallanList = () => {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
         <h1>Sales Challans</h1>
-        <Link to="/challans/new" className="btn btn-primary">+ Create Challan</Link>
+        {canCreate && <Link to="/challans/new" className="btn btn-primary">+ Create Challan</Link>}
       </div>
 
       {error && <div className="error-message" style={{ marginBottom: '1rem' }}>{error}</div>}
