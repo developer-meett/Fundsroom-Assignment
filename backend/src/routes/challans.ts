@@ -110,5 +110,31 @@ router.post('/', authorizeRoles('ADMIN', 'SALES'), async (req: AuthRequest, res:
     let totalQuantity = 0;
     const challanItemsData = [];
 
+    // Verify all products and prepare snapshot data
+    for (const item of items) {
+      const product = await prisma.product.findUnique({ where: { id: parseInt(item.product_id) } });
+      if (!product) {
+        res.status(404).json({ message: `Product with ID ${item.product_id} not found` });
+        return;
+      }
+      
+      const qty = parseInt(item.quantity);
+      if (isNaN(qty) || qty <= 0) {
+        res.status(400).json({ message: `Invalid quantity for product ${product.name}` });
+        return;
+      }
+
+      totalQuantity += qty;
+      
+      // Store snapshot of product data at time of challan creation
+      challanItemsData.push({
+        product_id: product.id,
+        product_name: product.name,
+        sku: product.sku,
+        unit_price: product.unit_price,
+        quantity: qty
+      });
+    }
+
 
 export default router;
