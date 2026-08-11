@@ -17,7 +17,7 @@ export const Login = () => {
     setLoading(true);
     try {
       const response = await api.post('/auth/login', { email, password });
-      login(response.data.user);
+      login(response.data);
       navigate('/');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to login');
@@ -33,11 +33,11 @@ export const Login = () => {
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label className="form-label">Email</label>
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="admin@erp.com" />
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="admin@erp.com" autoComplete="username" />
           </div>
           <div className="form-group">
             <label className="form-label">Password</label>
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required placeholder="password123" />
+            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required placeholder="password123" autoComplete="current-password" />
           </div>
           {error && <div className="error-message" style={{ marginBottom: '1rem' }}>{error}</div>}
           <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={loading}>
