@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import authRoutes from './routes/auth';
+import customerRoutes from './routes/customers';
 
 dotenv.config();
 
@@ -17,6 +18,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use('/api/auth', authRoutes);
+app.use('/api/customers', customerRoutes);
 
 app.get('/api/status', (req, res) => {
   res.json({ message: 'Backend is running correctly and connected to frontend!' });
