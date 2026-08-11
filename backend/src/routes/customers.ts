@@ -54,7 +54,7 @@ router.get('/', async (req: AuthRequest, res: Response): Promise<void> => {
 // GET /api/customers/:id — single customer
 router.get('/:id', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(String(req.params.id));
     if (isNaN(id)) {
       res.status(400).json({ message: 'Invalid customer ID' });
       return;
@@ -116,7 +116,7 @@ router.post('/', async (req: AuthRequest, res: Response): Promise<void> => {
 // PUT /api/customers/:id — update
 router.put('/:id', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(String(req.params.id));
     if (isNaN(id)) {
       res.status(400).json({ message: 'Invalid customer ID' });
       return;
@@ -161,7 +161,7 @@ router.put('/:id', async (req: AuthRequest, res: Response): Promise<void> => {
 // DELETE /api/customers/:id — delete
 router.delete('/:id', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(String(req.params.id));
     if (isNaN(id)) {
       res.status(400).json({ message: 'Invalid customer ID' });
       return;
@@ -184,7 +184,7 @@ router.delete('/:id', async (req: AuthRequest, res: Response): Promise<void> => 
 // POST /api/customers/:id/followups — add a follow-up note
 router.post('/:id/followups', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const customerId = parseInt(req.params.id);
+    const customerId = parseInt(String(req.params.id));
     if (isNaN(customerId)) {
       res.status(400).json({ message: 'Invalid customer ID' });
       return;

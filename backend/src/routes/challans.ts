@@ -64,7 +64,7 @@ router.get('/', async (req: AuthRequest, res: Response): Promise<void> => {
 // GET /api/challans/:id — single challan with items
 router.get('/:id', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(String(req.params.id));
     if (isNaN(id)) {
       res.status(400).json({ message: 'Invalid challan ID' });
       return;
@@ -163,7 +163,7 @@ router.post('/', authorizeRoles('ADMIN', 'SALES'), async (req: AuthRequest, res:
 // POST /api/challans/:id/confirm — confirm challan and deduct stock
 router.post('/:id/confirm', authorizeRoles('ADMIN', 'SALES', 'WAREHOUSE'), async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(String(req.params.id));
     if (isNaN(id)) {
       res.status(400).json({ message: 'Invalid challan ID' });
       return;
@@ -266,7 +266,7 @@ router.post('/:id/confirm', authorizeRoles('ADMIN', 'SALES', 'WAREHOUSE'), async
 // POST /api/challans/:id/cancel — cancel a DRAFT challan
 router.post('/:id/cancel', authorizeRoles('ADMIN', 'SALES'), async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(String(req.params.id));
     if (isNaN(id)) {
       res.status(400).json({ message: 'Invalid challan ID' });
       return;

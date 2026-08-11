@@ -66,7 +66,7 @@ router.get('/', async (req: AuthRequest, res: Response): Promise<void> => {
 // GET /api/products/:id — single product
 router.get('/:id', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(String(req.params.id));
     if (isNaN(id)) {
       res.status(400).json({ message: 'Invalid product ID' });
       return;
@@ -125,7 +125,7 @@ router.post('/', authorizeRoles('ADMIN', 'WAREHOUSE'), async (req: AuthRequest, 
 // PUT /api/products/:id — update product
 router.put('/:id', authorizeRoles('ADMIN', 'WAREHOUSE'), async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(String(req.params.id));
     if (isNaN(id)) {
       res.status(400).json({ message: 'Invalid product ID' });
       return;
@@ -175,7 +175,7 @@ router.put('/:id', authorizeRoles('ADMIN', 'WAREHOUSE'), async (req: AuthRequest
 // POST /api/products/:id/stock — adjust stock (IN or OUT)
 router.post('/:id/stock', authorizeRoles('ADMIN', 'WAREHOUSE'), async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(String(req.params.id));
     if (isNaN(id)) {
       res.status(400).json({ message: 'Invalid product ID' });
       return;
@@ -250,7 +250,7 @@ router.post('/:id/stock', authorizeRoles('ADMIN', 'WAREHOUSE'), async (req: Auth
 // GET /api/products/:id/movements — stock movement history
 router.get('/:id/movements', async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(String(req.params.id));
     if (isNaN(id)) {
       res.status(400).json({ message: 'Invalid product ID' });
       return;
