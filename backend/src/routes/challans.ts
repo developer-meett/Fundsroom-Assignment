@@ -160,5 +160,37 @@ router.post('/', authorizeRoles('ADMIN', 'SALES'), async (req: AuthRequest, res:
   }
 });
 
+// POST /api/challans/:id/confirm — confirm challan and deduct stock
+router.post('/:id/confirm', authorizeRoles('ADMIN', 'SALES', 'WAREHOUSE'), async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      res.status(400).json({ message: 'Invalid challan ID' });
+      return;
+    }
+
+    // Execute critical business logic inside a transaction
+    const result = await prisma.$transaction(async (tx) => {
+      // 1. Fetch challan with items
+      const challan = await tx.challan.findUnique({
+        where: { id },
+        include: { items: true }
+      });
+
+      if (!challan) {
+        throw new Error('CHALLAN_NOT_FOUND');
+      }
+
+      // 2. Check if currently DRAFT
+      if (challan.status === 'CONFIRMED') {
+        throw new Error('ALREADY_CONFIRMED');
+      }
+      if (challan.status === 'CANCELLED') {
+        throw new Error('IS_CANCELLED');
+      }
+      if (challan.status !== 'DRAFT') {
+        throw new Error('NOT_DRAFT');
+      }
+
 
 export default router;
