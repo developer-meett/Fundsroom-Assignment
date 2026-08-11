@@ -263,5 +263,37 @@ router.post('/:id/confirm', authorizeRoles('ADMIN', 'SALES', 'WAREHOUSE'), async
   }
 });
 
+// POST /api/challans/:id/cancel — cancel a DRAFT challan
+router.post('/:id/cancel', authorizeRoles('ADMIN', 'SALES'), async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      res.status(400).json({ message: 'Invalid challan ID' });
+      return;
+    }
+
+    const challan = await prisma.challan.findUnique({ where: { id } });
+    
+    if (!challan) {
+      res.status(404).json({ message: 'Challan not found' });
+      return;
+    }
+
+    if (challan.status !== 'DRAFT') {
+      res.status(400).json({ message: `Cannot cancel challan because it is already ${challan.status}` });
+      return;
+    }
+
+    const updatedChallan = await prisma.challan.update({
+      where: { id },
+      data: { status: 'CANCELLED' }
+    });
+
+    res.json({ message: 'Challan cancelled successfully', data: updatedChallan });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
 
 export default router;
