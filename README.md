@@ -1,5 +1,9 @@
 # Mini ERP + CRM Operations Portal
 
+**Live Application:** [https://fundsroom-assignment-theta.vercel.app](https://fundsroom-assignment-theta.vercel.app)  
+**Backend API:** [https://fundsroom-assignment-7w6q.onrender.com](https://fundsroom-assignment-7w6q.onrender.com)
+
+
 ## 1. Project Overview
 This project is a comprehensive **Mini ERP and CRM Operations Portal** designed to manage B2B and retail sales workflows. It provides a centralized dashboard for tracking customers, inventory, and end-to-end sales transactions (Challans). The system is built with a strictly typed backend and a responsive, role-based frontend.
 
