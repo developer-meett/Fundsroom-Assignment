@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
 
 export const ProductList = () => {
@@ -10,6 +10,8 @@ export const ProductList = () => {
   const [lowStockOnly, setLowStockOnly] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0 });
+  const { user } = useAuth();
+  const canEdit = ['ADMIN', 'WAREHOUSE'].includes(user?.role || '');
 
   const currentPage = parseInt(searchParams.get('page') || '1');
 
@@ -41,7 +43,7 @@ export const ProductList = () => {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
         <h1>Products</h1>
-        <Link to="/products/new" className="btn btn-primary">+ Add Product</Link>
+        {canEdit && <Link to="/products/new" className="btn btn-primary">+ Add Product</Link>}
       </div>
 
       <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
@@ -112,7 +114,9 @@ export const ProductList = () => {
                       <td>
                         <div style={{ display: 'flex', gap: '0.25rem' }}>
                           <Link to={`/products/${p.id}`} className="btn btn-primary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}>View</Link>
-                          <Link to={`/products/${p.id}/edit`} className="btn" style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem', backgroundColor: 'var(--border-color)', color: 'var(--text-main)' }}>Edit</Link>
+                          {canEdit && (
+                            <Link to={`/products/${p.id}/edit`} className="btn" style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem', backgroundColor: 'var(--border-color)', color: 'var(--text-main)' }}>Edit</Link>
+                          )}
                         </div>
                       </td>
                     </tr>
