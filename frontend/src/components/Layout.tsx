@@ -17,8 +17,17 @@ export const Layout = () => {
         <div className="sidebar-header">Mini ERP</div>
         <nav className="sidebar-nav">
           <Link to="/" className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}>Dashboard</Link>
-          <Link to="/customers" className={`nav-link ${location.pathname.startsWith('/customers') ? 'active' : ''}`}>Customers</Link>
+          
+          {['ADMIN', 'SALES', 'ACCOUNTS'].includes(user?.role || '') && (
+            <Link to="/customers" className={`nav-link ${location.pathname.startsWith('/customers') ? 'active' : ''}`}>Customers</Link>
+          )}
+          
           <Link to="/products" className={`nav-link ${location.pathname.startsWith('/products') ? 'active' : ''}`}>Products</Link>
+          
+          {['ADMIN', 'WAREHOUSE'].includes(user?.role || '') && (
+            <Link to="/inventory" className={`nav-link ${location.pathname.startsWith('/inventory') ? 'active' : ''}`}>Inventory / Stock</Link>
+          )}
+          
           <Link to="/challans" className={`nav-link ${location.pathname.startsWith('/challans') ? 'active' : ''}`}>Sales Challans</Link>
         </nav>
         <div className="sidebar-footer">
