@@ -1,20 +1,21 @@
+import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import api from '../api/axios';
 
 export const Dashboard = () => {
   const { user } = useAuth();
-  return (
-    <div>
-      <h1 style={{ marginBottom: '2rem' }}>Welcome, {user?.name}!</h1>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem' }}>
-        <div className="card">
-          <h3>Your Role</h3>
-          <p style={{ marginTop: '1rem', color: 'var(--text-muted)' }}>You are logged in as a <strong>{user?.role}</strong>.</p>
-        </div>
-        <div className="card">
-          <h3>System Status</h3>
-          <p style={{ marginTop: '1rem', color: 'var(--text-muted)' }}>Backend connection is healthy.</p>
-        </div>
-      </div>
-    </div>
-  );
+  
+  const [stats, setStats] = useState({ customers: 0, products: 0, lowStock: 0, challans: 0 });
+  const [recentChallans, setRecentChallans] = useState<any[]>([]);
+  const [lowStockProducts, setLowStockProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  
+  useEffect(() => {
+    // API logic to be implemented
+    setLoading(false);
+  }, []);
+
+  if (loading) return <div>Loading dashboard...</div>;
+
+  return <div><h1 style={{ marginBottom: '2rem' }}>Dashboard</h1><p>KPIs loading...</p></div>;
 };
