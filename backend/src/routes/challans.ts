@@ -136,5 +136,29 @@ router.post('/', authorizeRoles('ADMIN', 'SALES'), async (req: AuthRequest, res:
       });
     }
 
+    // Creating DRAFT does not affect stock, just creates the records
+    const challanNumber = await generateChallanNumber();
+
+    const challan = await prisma.challan.create({
+      data: {
+        challan_number: challanNumber,
+        customer_id: customer.id,
+        status: 'DRAFT',
+        total_quantity: totalQuantity,
+        created_by: req.user!.id,
+        items: {
+          create: challanItemsData
+        }
+      },
+      include: { items: true }
+    });
+
+    res.status(201).json(challan);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 
 export default router;
