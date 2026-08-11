@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
 
 export const CustomerDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const canEdit = ['ADMIN', 'SALES'].includes(user?.role || '');
   const [customer, setCustomer] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -72,10 +75,12 @@ export const CustomerDetail = () => {
           <Link to="/customers" className="text-muted" style={{ fontSize: '0.875rem' }}>← Back to Customers</Link>
           <h1 style={{ marginTop: '0.5rem' }}>{customer.name}</h1>
         </div>
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
-          <Link to={`/customers/${id}/edit`} className="btn btn-primary">Edit</Link>
-          <button className="btn btn-danger" onClick={handleDelete}>Delete</button>
-        </div>
+        {canEdit && (
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <Link to={`/customers/${id}/edit`} className="btn btn-primary">Edit</Link>
+            <button className="btn btn-danger" onClick={handleDelete}>Delete</button>
+          </div>
+        )}
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '1.5rem' }}>
@@ -131,30 +136,32 @@ export const CustomerDetail = () => {
         {/* Follow-ups Section */}
         <div>
           {/* Add Follow-up Form */}
-          <div className="card" style={{ marginBottom: '1.5rem' }}>
-            <h3 style={{ marginBottom: '1rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>Add Follow-up</h3>
-            <form onSubmit={handleFollowUp}>
-              <div className="form-group">
-                <label className="form-label">Note *</label>
-                <textarea
-                  value={note}
-                  onChange={(e) => setNote(e.target.value)}
-                  required
-                  rows={3}
-                  placeholder="Enter follow-up note..."
-                  style={{ width: '100%', padding: '0.75rem', border: '1px solid var(--border-color)', borderRadius: '0.375rem', backgroundColor: 'var(--card-bg)', color: 'var(--text-main)', fontFamily: 'inherit', resize: 'vertical' }}
-                />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Next Follow-up Date</label>
-                <input type="date" value={followUpDate} onChange={(e) => setFollowUpDate(e.target.value)} />
-              </div>
-              {followUpError && <div className="error-message" style={{ marginBottom: '0.5rem' }}>{followUpError}</div>}
-              <button type="submit" className="btn btn-primary" disabled={submitting}>
-                {submitting ? 'Saving...' : 'Add Follow-up'}
-              </button>
-            </form>
-          </div>
+          {canEdit && (
+            <div className="card" style={{ marginBottom: '1.5rem' }}>
+              <h3 style={{ marginBottom: '1rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>Add Follow-up</h3>
+              <form onSubmit={handleFollowUp}>
+                <div className="form-group">
+                  <label className="form-label">Note *</label>
+                  <textarea
+                    value={note}
+                    onChange={(e) => setNote(e.target.value)}
+                    required
+                    rows={3}
+                    placeholder="Enter follow-up note..."
+                    style={{ width: '100%', padding: '0.75rem', border: '1px solid var(--border-color)', borderRadius: '0.375rem', backgroundColor: 'var(--card-bg)', color: 'var(--text-main)', fontFamily: 'inherit', resize: 'vertical' }}
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Next Follow-up Date</label>
+                  <input type="date" value={followUpDate} onChange={(e) => setFollowUpDate(e.target.value)} />
+                </div>
+                {followUpError && <div className="error-message" style={{ marginBottom: '0.5rem' }}>{followUpError}</div>}
+                <button type="submit" className="btn btn-primary" disabled={submitting}>
+                  {submitting ? 'Saving...' : 'Add Follow-up'}
+                </button>
+              </form>
+            </div>
+          )}
 
           {/* Follow-up History */}
           <div className="card">
