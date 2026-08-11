@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
 
 export const CustomerList = () => {
@@ -9,6 +9,8 @@ export const CustomerList = () => {
   const [search, setSearch] = useState('');
   const [searchParams, setSearchParams] = useSearchParams();
   const [pagination, setPagination] = useState({ page: 1, totalPages: 1, total: 0 });
+  const { user } = useAuth();
+  const canEdit = ['ADMIN', 'SALES'].includes(user?.role || '');
 
   const currentPage = parseInt(searchParams.get('page') || '1');
 
@@ -41,7 +43,7 @@ export const CustomerList = () => {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
         <h1>Customers</h1>
-        <Link to="/customers/new" className="btn btn-primary">+ Add Customer</Link>
+        {canEdit && <Link to="/customers/new" className="btn btn-primary">+ Add Customer</Link>}
       </div>
 
       {/* Search Bar */}
@@ -97,7 +99,11 @@ export const CustomerList = () => {
                     </td>
                     <td>{c.follow_up_date ? new Date(c.follow_up_date).toLocaleDateString() : '—'}</td>
                     <td>
-                      <Link to={`/customers/${c.id}/edit`} className="btn btn-primary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}>Edit</Link>
+                      {canEdit ? (
+                        <Link to={`/customers/${c.id}/edit`} className="btn btn-primary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}>Edit</Link>
+                      ) : (
+                        <Link to={`/customers/${c.id}`} className="btn btn-primary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}>View</Link>
+                      )}
                     </td>
                   </tr>
                 ))}
