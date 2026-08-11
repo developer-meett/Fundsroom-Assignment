@@ -85,6 +85,7 @@ router.get('/:id', async (req: AuthRequest, res: Response): Promise<void> => {
     res.status(500).json({ message: 'Internal server error' });
   }
 });
+
 // POST /api/products — create product
 router.post('/', authorizeRoles('ADMIN', 'WAREHOUSE'), async (req: AuthRequest, res: Response): Promise<void> => {
   try {
@@ -170,6 +171,7 @@ router.put('/:id', authorizeRoles('ADMIN', 'WAREHOUSE'), async (req: AuthRequest
     res.status(500).json({ message: 'Internal server error' });
   }
 });
+
 // POST /api/products/:id/stock — adjust stock (IN or OUT)
 router.post('/:id/stock', authorizeRoles('ADMIN', 'WAREHOUSE'), async (req: AuthRequest, res: Response): Promise<void> => {
   try {
@@ -244,4 +246,50 @@ router.post('/:id/stock', authorizeRoles('ADMIN', 'WAREHOUSE'), async (req: Auth
     res.status(500).json({ message: 'Internal server error' });
   }
 });
+
+// GET /api/products/:id/movements — stock movement history
+router.get('/:id/movements', async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      res.status(400).json({ message: 'Invalid product ID' });
+      return;
+    }
+
+    const product = await prisma.product.findUnique({ where: { id } });
+    if (!product) {
+      res.status(404).json({ message: 'Product not found' });
+      return;
+    }
+
+    const page = Math.max(1, parseInt(String(req.query.page || '1')));
+    const limit = Math.min(100, Math.max(1, parseInt(String(req.query.limit || '20'))));
+    const skip = (page - 1) * limit;
+
+    const [movements, total] = await Promise.all([
+      prisma.stockMovement.findMany({
+        where: { product_id: id },
+        skip,
+        take: limit,
+        orderBy: { created_at: 'desc' },
+        include: { user: { select: { id: true, name: true } } },
+      }),
+      prisma.stockMovement.count({ where: { product_id: id } }),
+    ]);
+
+    res.json({
+      data: movements,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 export default router;
