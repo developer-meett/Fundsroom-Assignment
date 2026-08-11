@@ -9,7 +9,12 @@ export interface AuthRequest extends Request {
 }
 
 export const authenticate = (req: AuthRequest, res: Response, next: NextFunction): void => {
-  const token = req.cookies.jwt;
+  let token = req.cookies.jwt;
+  
+  // Fallback: check Authorization header for cross-origin deployments
+  if (!token && req.headers.authorization?.startsWith('Bearer ')) {
+    token = req.headers.authorization.split(' ')[1];
+  }
   
   if (!token) {
     res.status(401).json({ message: 'Authentication required' });

@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useEffect, type ReactNode } from '
 import api from '../api/axios';
 
 interface User { id: number; name: string; email: string; role: string; }
-interface AuthContextType { user: User | null; loading: boolean; login: (user: User) => void; logout: () => Promise<void>; }
+interface AuthContextType { user: User | null; loading: boolean; login: (user: User, token?: string) => void; logout: () => Promise<void>; }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -17,6 +17,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(response.data);
       } catch (error) {
         setUser(null);
+        localStorage.removeItem('token');
       } finally {
         setLoading(false);
       }
@@ -24,9 +25,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     checkAuth();
   }, []);
 
-  const login = (userData: User) => { setUser(userData); };
+  const login = (userData: User, token?: string) => {
+    if (token) {
+      localStorage.setItem('token', token);
+    }
+    setUser(userData);
+  };
+
   const logout = async () => {
-    try { await api.post('/auth/logout'); } catch (error) { console.error(error); } finally { setUser(null); }
+    try { await api.post('/auth/logout'); } catch (error) { console.error(error); } finally {
+      localStorage.removeItem('token');
+      setUser(null);
+    }
   };
 
   return (
