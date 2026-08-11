@@ -61,5 +61,35 @@ router.get('/', async (req: AuthRequest, res: Response): Promise<void> => {
   }
 });
 
+// GET /api/challans/:id — single challan with items
+router.get('/:id', async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      res.status(400).json({ message: 'Invalid challan ID' });
+      return;
+    }
+
+    const challan = await prisma.challan.findUnique({
+      where: { id },
+      include: {
+        customer: { select: { id: true, name: true, business_name: true, address: true, mobile: true } },
+        user: { select: { id: true, name: true } },
+        items: true
+      }
+    });
+
+    if (!challan) {
+      res.status(404).json({ message: 'Challan not found' });
+      return;
+    }
+
+    res.json(challan);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 
 export default router;
