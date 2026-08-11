@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
 
 export const ProductDetail = () => {
   const { id } = useParams();
+  const { user } = useAuth();
+  const canEdit = ['ADMIN', 'WAREHOUSE'].includes(user?.role || '');
   const [product, setProduct] = useState<any>(null);
   const [movements, setMovements] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -76,7 +79,7 @@ export const ProductDetail = () => {
           <Link to="/products" className="text-muted" style={{ fontSize: '0.875rem' }}>← Back to Products</Link>
           <h1 style={{ marginTop: '0.5rem' }}>{product.name}</h1>
         </div>
-        <Link to={`/products/${id}/edit`} className="btn btn-primary">Edit Product</Link>
+        {canEdit && <Link to={`/products/${id}/edit`} className="btn btn-primary">Edit Product</Link>}
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '1.5rem' }}>
@@ -123,37 +126,39 @@ export const ProductDetail = () => {
         </div>
 
         {/* Stock Adjustment Form */}
-        <div className="card">
-          <h3 style={{ marginBottom: '1rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>Adjust Stock</h3>
-          <form onSubmit={handleStockAdjust}>
-            <div className="form-group">
-              <label className="form-label">Type</label>
-              <div style={{ display: 'flex', gap: '1rem' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                  <input type="radio" name="adjType" value="IN" checked={adjType === 'IN'} onChange={() => setAdjType('IN')} style={{ width: 'auto' }} />
-                  <span style={{ color: 'var(--secondary)', fontWeight: 500 }}>Stock IN</span>
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                  <input type="radio" name="adjType" value="OUT" checked={adjType === 'OUT'} onChange={() => setAdjType('OUT')} style={{ width: 'auto' }} />
-                  <span style={{ color: 'var(--danger)', fontWeight: 500 }}>Stock OUT</span>
-                </label>
+        {canEdit && (
+          <div className="card">
+            <h3 style={{ marginBottom: '1rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>Adjust Stock</h3>
+            <form onSubmit={handleStockAdjust}>
+              <div className="form-group">
+                <label className="form-label">Type</label>
+                <div style={{ display: 'flex', gap: '1rem' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                    <input type="radio" name="adjType" value="IN" checked={adjType === 'IN'} onChange={() => setAdjType('IN')} style={{ width: 'auto' }} />
+                    <span style={{ color: 'var(--secondary)', fontWeight: 500 }}>Stock IN</span>
+                  </label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                    <input type="radio" name="adjType" value="OUT" checked={adjType === 'OUT'} onChange={() => setAdjType('OUT')} style={{ width: 'auto' }} />
+                    <span style={{ color: 'var(--danger)', fontWeight: 500 }}>Stock OUT</span>
+                  </label>
+                </div>
               </div>
-            </div>
-            <div className="form-group">
-              <label className="form-label">Quantity *</label>
-              <input type="number" min="1" value={adjQuantity} onChange={(e) => setAdjQuantity(e.target.value)} required />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Reason</label>
-              <input type="text" value={adjReason} onChange={(e) => setAdjReason(e.target.value)} placeholder="e.g. New purchase, Damaged goods..." />
-            </div>
-            {adjError && <div className="error-message" style={{ marginBottom: '0.5rem' }}>{adjError}</div>}
-            {adjSuccess && <div style={{ color: 'var(--secondary)', fontSize: '0.875rem', marginBottom: '0.5rem', fontWeight: 500 }}>{adjSuccess}</div>}
-            <button type="submit" className="btn btn-primary" disabled={adjSubmitting}>
-              {adjSubmitting ? 'Adjusting...' : 'Apply Adjustment'}
-            </button>
-          </form>
-        </div>
+              <div className="form-group">
+                <label className="form-label">Quantity *</label>
+                <input type="number" min="1" value={adjQuantity} onChange={(e) => setAdjQuantity(e.target.value)} required />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Reason</label>
+                <input type="text" value={adjReason} onChange={(e) => setAdjReason(e.target.value)} placeholder="e.g. New purchase, Damaged goods..." />
+              </div>
+              {adjError && <div className="error-message" style={{ marginBottom: '0.5rem' }}>{adjError}</div>}
+              {adjSuccess && <div style={{ color: 'var(--secondary)', fontSize: '0.875rem', marginBottom: '0.5rem', fontWeight: 500 }}>{adjSuccess}</div>}
+              <button type="submit" className="btn btn-primary" disabled={adjSubmitting}>
+                {adjSubmitting ? 'Adjusting...' : 'Apply Adjustment'}
+              </button>
+            </form>
+          </div>
+        )}
       </div>
 
       {/* Movement History */}
