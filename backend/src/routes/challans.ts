@@ -192,5 +192,76 @@ router.post('/:id/confirm', authorizeRoles('ADMIN', 'SALES', 'WAREHOUSE'), async
         throw new Error('NOT_DRAFT');
       }
 
+      // 3 & 4. Verify stock for EVERY item
+      for (const item of challan.items) {
+        const product = await tx.product.findUnique({ where: { id: item.product_id } });
+        if (!product) {
+          throw new Error(`PRODUCT_NOT_FOUND_${item.product_id}`);
+        }
+        
+        if (product.current_stock < item.quantity) {
+          throw new Error(`INSUFFICIENT_STOCK_${product.name}`);
+        }
+      }
+
+      // 5 & 6. Deduct stock and create OUT movements for every product
+      for (const item of challan.items) {
+        await tx.product.update({
+          where: { id: item.product_id },
+          data: {
+            current_stock: { decrement: item.quantity }
+          }
+        });
+
+        await tx.stockMovement.create({
+          data: {
+            product_id: item.product_id,
+            quantity: item.quantity,
+            type: 'OUT',
+            reason: `Sales Challan ${challan.challan_number}`,
+            created_by: req.user!.id
+          }
+        });
+      }
+
+      // 7. Update challan status to CONFIRMED
+      const updatedChallan = await tx.challan.update({
+        where: { id },
+        data: { status: 'CONFIRMED' },
+        include: { items: true }
+      });
+
+      return updatedChallan;
+    });
+
+    res.json({ message: 'Challan confirmed successfully', data: result });
+  } catch (error: any) {
+    if (error.message === 'CHALLAN_NOT_FOUND') {
+      res.status(404).json({ message: 'Challan not found' });
+      return;
+    }
+    if (error.message === 'ALREADY_CONFIRMED') {
+      res.status(400).json({ message: 'This challan is already confirmed' });
+      return;
+    }
+    if (error.message === 'IS_CANCELLED') {
+      res.status(400).json({ message: 'This challan was cancelled and cannot be confirmed' });
+      return;
+    }
+    if (error.message === 'NOT_DRAFT') {
+      res.status(400).json({ message: 'Only DRAFT challans can be confirmed' });
+      return;
+    }
+    if (error.message.startsWith('INSUFFICIENT_STOCK_')) {
+      const productName = error.message.replace('INSUFFICIENT_STOCK_', '');
+      res.status(400).json({ message: `Insufficient stock for product: ${productName}. Confirmation aborted.` });
+      return;
+    }
+    
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
 
 export default router;
