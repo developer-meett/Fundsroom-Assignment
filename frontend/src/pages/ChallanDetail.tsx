@@ -66,6 +66,7 @@ export const ChallanDetail = () => {
 
   const isDraft = challan.status === 'DRAFT';
   const canConfirm = isDraft && ['ADMIN', 'SALES', 'WAREHOUSE'].includes(user?.role || '');
+  const canCancel = isDraft && ['ADMIN', 'SALES'].includes(user?.role || '');
 
   let totalValue = 0;
 
@@ -89,7 +90,9 @@ export const ChallanDetail = () => {
                 {confirming ? 'Confirming...' : 'Confirm Challan (Deduct Stock)'}
               </button>
             )}
-            <button className="btn btn-danger" onClick={handleCancel}>Cancel Draft</button>
+            {canCancel && (
+              <button className="btn btn-danger" onClick={handleCancel}>Cancel Draft</button>
+            )}
           </div>
         )}
       </div>
