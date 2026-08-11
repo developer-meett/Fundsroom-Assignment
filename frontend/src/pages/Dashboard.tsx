@@ -1,10 +1,7 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
 
 export const Dashboard = () => {
-  const { user } = useAuth();
-  
   const [stats, setStats] = useState({
     customers: 0,
     products: 0,
