@@ -10,6 +10,9 @@ import { CustomerDetail } from './pages/CustomerDetail';
 import { ProductList } from './pages/ProductList';
 import { ProductForm } from './pages/ProductForm';
 import { ProductDetail } from './pages/ProductDetail';
+import { ChallanList } from './pages/ChallanList';
+import { ChallanForm } from './pages/ChallanForm';
+import { ChallanDetail } from './pages/ChallanDetail';
 import './index.css';
 
 function App() {
@@ -30,7 +33,9 @@ function App() {
               <Route path="/products/:id" element={<ProductDetail />} />
               <Route path="/products/:id/edit" element={<ProductForm />} />
               <Route path="/inventory" element={<ProductList />} />
-              <Route path="/challans" element={<div className="card">Challans Module Pending...</div>} />
+              <Route path="/challans" element={<ChallanList />} />
+              <Route path="/challans/new" element={<ChallanForm />} />
+              <Route path="/challans/:id" element={<ChallanDetail />} />
             </Route>
           </Route>
         </Routes>
