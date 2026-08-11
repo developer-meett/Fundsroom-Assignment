@@ -5,6 +5,7 @@ import cookieParser from 'cookie-parser';
 import authRoutes from './routes/auth';
 import customerRoutes from './routes/customers';
 import productRoutes from './routes/products';
+import challanRoutes from './routes/challans';
 
 dotenv.config();
 
@@ -21,6 +22,7 @@ app.use(cookieParser());
 app.use('/api/auth', authRoutes);
 app.use('/api/customers', customerRoutes);
 app.use('/api/products', productRoutes);
+app.use('/api/challans', challanRoutes);
 
 app.get('/api/status', (req, res) => {
   res.json({ message: 'Backend is running correctly and connected to frontend!' });
